@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QR Code Generator</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="form-container">
+    <form id="submit">
+      <input class="userInput" id="userInput" type="text" placeholder="Enter text or link" required>
+      <input type="submit" value="Generate QR Code" />
+    </form>
+  </div>
+  <div id="test">
+    <p id="message">🤔 Waiting for your link to generate a QR Code...</p>
+  </div>
+  <button id="generateAnother" style="display: none;">Generate Another</button>
+
+  <!-- Credit Section -->
+  <footer id="credits">
+    <p>Made with ❤️ by Tim Hiang</p>
+  </footer>
+</body>
+<script>
+  const motivationalQuotes = [
+    "🚀 One step closer to greatness!",
+    "🎉 A QR code a day keeps boredom away!",
+    "🌟 You’re absolutely crushing it!",
+    "✨ Scanning your way to success!",
+    "💪 QR codes never looked so good!"
+  ];
+
+  const formContainer = document.getElementById('form-container');
+  const submitForm = document.getElementById('submit');
+  const generateAnotherBtn = document.getElementById('generateAnother');
+  const resultDiv = document.getElementById('test');
+  const message = document.getElementById('message');
+
+  // Handle the QR Code generation form
+  submitForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    const userInput = document.getElementById('userInput').value;
+
+    fetch("http://localhost:3000/i", {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userInput })
+    })
+      .then(response => response.json())
+      .then(data => {
+        // Hide the form
+        formContainer.style.display = 'none';
+
+        // Clear the old content
+        resultDiv.innerHTML = '';
+
+        // Display the QR code
+        const qrImage = document.createElement('img');
+        qrImage.src = data.qrCodeData; // Set the image source to the QR code data
+        qrImage.alt = 'Generated QR Code';
+        qrImage.classList.add('qr-code');
+        resultDiv.appendChild(qrImage);
+
+        // Display a random motivational quote
+        const randomQuote = motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)];
+        const quoteElement = document.createElement('p');
+        quoteElement.classList.add('quote');
+        quoteElement.textContent = randomQuote;
+        resultDiv.appendChild(quoteElement);
+
+        // Show the "Generate Another" button
+        generateAnotherBtn.style.display = 'block';
+      })
+      .catch(err => {
+        console.error('Error:', err);
+        message.innerHTML = '❌ Error generating QR code. Please try again.';
+      });
+  });
+
+  // Handle "Generate Another" button click
+  generateAnotherBtn.addEventListener('click', function () {
+    // Show the form
+    formContainer.style.display = 'block';
+
+    // Reset the form and content
+    resultDiv.innerHTML = '<p id="message">🤔 Waiting for your link to generate a QR Code...</p>';
+    generateAnotherBtn.style.display = 'none';
+    document.getElementById('userInput').value = ''; // Clear the input field
+  });
+</script>
+</html>
